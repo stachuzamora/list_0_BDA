@@ -60,7 +60,14 @@ class WordCloudGenerator {
     output = removeStopWords(output)
     val outputMap = countWords(output)
     outputMap.foreach(p => println(p._1 + " " + p._2))
-    WORD_CLOUD_MAP ++ outputMap.map { case (k, v) => k -> (v + outputMap.getOrElse(k, 0)) }
+    outputMap.foreach(p => {
+      WORD_CLOUD_MAP.updateWith(p._1) {
+        case Some(value) => Some(value + p._2)
+        case None => Some(p._2)
+      }
+    })
+    WORD_CLOUD_MAP = mutable.Map(WORD_CLOUD_MAP.toSeq.sortWith(_._2 > _._2):_*)
+    //    WORD_CLOUD_MAP ++ outputMap.map { case (k, v) => k -> (v + outputMap.getOrElse(k, 0)) }
     false
   }
 
@@ -84,7 +91,14 @@ class WordCloudGenerator {
       wordsList = removeStopWords(wordsList)
       val countWordsMap = countWords(wordsList)
       countWordsMap.foreach(p => println(p._1 + " " + p._2))
-      WORD_CLOUD_MAP ++ countWordsMap.map { case (k, v) => k -> (v + countWordsMap.getOrElse(k, 0)) }
+//      WORD_CLOUD_MAP ++ countWordsMap.map { case (k, v) => k -> (v + countWordsMap.getOrElse(k, 0)) }
+      countWordsMap.foreach(p => {
+        WORD_CLOUD_MAP.updateWith(p._1) {
+          case Some(value) => Some(value + p._2)
+          case None => Some(p._2)
+        }
+      })
+      WORD_CLOUD_MAP = mutable.Map(WORD_CLOUD_MAP.toSeq.sortWith(_._2 > _._2):_*)
     } catch {
       case _: FileNotFoundException => println("No such file, provide correct one")
     }
@@ -94,7 +108,7 @@ class WordCloudGenerator {
 
     private def showWordCloud = {
       println("*************MAP***********")
-      println(WORD_CLOUD_MAP)
+      WORD_CLOUD_MAP.foreach(p => println(p._1 + " " + p._2))
       println("***************************")
       false
     }
